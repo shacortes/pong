@@ -9,14 +9,16 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
 // Classe que representa un panell on es dibuixa un cercle que rebota
 public class CercleRebotant extends JPanel implements ActionListener, KeyListener {
-    private JPanel BarresJugador1;
-    private int x = 50, y = 50, z = 50; // Coordenades inicials del cercle
+    private int x = 50, y = 50; // Coordenades inicials del cercle
+    public int dretaY = 50, esquerraY = 50;
     private int dx = 2, dy = 2; // Velocitat del moviment en X i Y
     private final int RADI = 20; // Radi del cercle
     private final int DELAY = 10; // Retard del temporitzador en mil·lisegons
@@ -27,6 +29,9 @@ public class CercleRebotant extends JPanel implements ActionListener, KeyListene
         setBackground(Color.WHITE); // Defineix el color de fons del panell
         timer = new Timer(DELAY, this); // Crea el temporitzador amb retard especificat
         timer.start(); // Inicia el temporitzador
+        setFocusable(true);
+        addKeyListener(this);
+
     }
 
     // Mètode per dibuixar el cercle dins del panell
@@ -38,7 +43,10 @@ public class CercleRebotant extends JPanel implements ActionListener, KeyListene
         g2d.fillOval(x, y, RADI * 2, RADI * 2); // Dibuixa el cercle amb les coordenades i el radi
         Graphics2D barraE = (Graphics2D) g;
         barraE.setColor(Color.BLACK); // Defineix el color del cercle
-        barraE.fillRect(z, 100, 50, 100);
+        barraE.fillRect(50, esquerraY, 50, 100);
+        Graphics2D barraD = (Graphics2D) g;
+        barraE.setColor(Color.BLACK); // Defineix el color del cercle
+        barraE.fillRect(1810, dretaY, 50, 100);
     }
 
     // Mètode que s'executa a cada tic del temporitzador per moure el cercle
@@ -62,34 +70,34 @@ public class CercleRebotant extends JPanel implements ActionListener, KeyListene
 
     @Override
     public void keyTyped(KeyEvent e) {
-        if (e.getKeyCode() == KeyEvent.VK_W) {
-            z = z+100;
-        }
-        if (e.getKeyCode() == KeyEvent.VK_S) {
-            z--;
-        }repaint();
-        throw new UnsupportedOperationException("Not supported yet.");
+
     }
 
     @Override
     public void keyPressed(KeyEvent e) {
-        if (e.getKeyCode() == KeyEvent.VK_W) {
-            z = z+100;        }
-        if (e.getKeyCode() == KeyEvent.VK_S) {
-            z--;
+        if(esquerraY >= -10){
+            if (e.getKeyCode() == KeyEvent.VK_W) {
+                esquerraY = esquerraY - 10;        }
+            else if (e.getKeyCode() == KeyEvent.VK_S) {
+                esquerraY = esquerraY + 10;
+            }
+        }
+
+        if(dretaY >= -10){
+            if (e.getKeyCode() == KeyEvent.VK_UP) {
+                dretaY = dretaY - 10;        }
+            else if (e.getKeyCode() == KeyEvent.VK_DOWN) {
+                dretaY = dretaY + 10;
+            }
         }
         repaint();
-        throw new UnsupportedOperationException("Not supported yet.");
+
     }
 
     @Override
     public void keyReleased(KeyEvent e) {
-        if (e.getKeyCode() == KeyEvent.VK_W) {
-            z = z+100;        }
-        if (e.getKeyCode() == KeyEvent.VK_S) {
-            z--;
-        }repaint();
-        throw new UnsupportedOperationException("Not supported yet.");
+        repaint();
+
     }
 
     // Mètode principal per iniciar l'aplicació
@@ -97,7 +105,9 @@ public class CercleRebotant extends JPanel implements ActionListener, KeyListene
         SwingUtilities.invokeLater(() -> {
             JFrame frame = new JFrame("Cercle Rebotant"); // Crea la finestra
             CercleRebotant panel = new CercleRebotant(); // Crea una instància del panell
-            panel.add(new BarresJugador1());
+            JLabel zInt = new JLabel();
+            zInt.setHorizontalTextPosition(SwingConstants.CENTER);
+            //zInt.setText();
             frame.add(panel); // Afegeix el panell a la finestra
 
             frame.setSize(1920, 1080); // Defineix la mida de la finestra

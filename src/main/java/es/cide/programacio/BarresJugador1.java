@@ -1,8 +1,6 @@
 package es.cide.programacio;
 
-import java.awt.Color;
 import java.awt.Graphics;
-import java.awt.Graphics2D;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
@@ -31,9 +29,6 @@ public class BarresJugador1 extends JPanel implements KeyListener{
     }
     @Override
     public void paintComponent(Graphics g) {
-        super.paintComponent(g);
-        Graphics2D g2d1 = (Graphics2D) g; // Conversió a Graphics2D per millorar el dibuix
-        g2d1.setColor(Color.BLACK); // Defineix el color del cercle
-        g2d1.fillRect(100, 50, 0, 0);
+        
     }
 }

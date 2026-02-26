@@ -8,7 +8,12 @@ import java.awt.event.KeyListener;
 
 import javax.swing.JPanel;
 
-public class BarresJugador2 extends JPanel implements KeyListener {
+public class barresJugadors extends JPanel implements KeyListener{
+    public int z = 100;
+
+    public barresJugadors(){
+
+    }
 
     @Override
     public void keyTyped(KeyEvent e) {
@@ -24,12 +29,14 @@ public class BarresJugador2 extends JPanel implements KeyListener {
     public void keyReleased(KeyEvent e) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
-
     @Override
-    public void paintComponent(Graphics g) {
+    protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        Graphics2D g2d1 = (Graphics2D) g; // Conversió a Graphics2D per millorar el dibuix
-        g2d1.setColor(Color.BLACK); // Defineix el color del cercle
-        g2d1.fillRect(200, 50, 0, 0);
+        Graphics2D barraE = (Graphics2D) g;
+        barraE.setColor(Color.BLACK); // Defineix el color del cercle
+        barraE.fillRect(50, z, 50, 100);
+        Graphics2D barraD = (Graphics2D) g;
+        barraE.setColor(Color.BLACK); // Defineix el color del cercle
+        barraE.fillRect(1870, z, 50, 100);
     }
 }
