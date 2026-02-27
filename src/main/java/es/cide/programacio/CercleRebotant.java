@@ -1,6 +1,7 @@
 package es.cide.programacio;
 
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.event.ActionEvent;
@@ -9,112 +10,148 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
-// Classe que representa un panell on es dibuixa un cercle que rebota
 public class CercleRebotant extends JPanel implements ActionListener, KeyListener {
-    private int x = 50, y = 50; // Coordenades inicials del cercle
-    public int dretaY = 50, esquerraY = 50;
-    private int dx = 2, dy = 2; // Velocitat del moviment en X i Y
-    private final int RADI = 20; // Radi del cercle
-    private final int DELAY = 10; // Retard del temporitzador en mil·lisegons
-    private Timer timer; // Temporitzador per controlar l'animació
+    private int x = 50, y = 50;
+    private int dx = 2, dy = 2;
+    private final int RADI = 20;
+    private final int DELAY = 10;
+    private Timer timer;
 
-    // Constructor que inicialitza el panell i inicia el temporitzador
+    private Barra barraE, barraD;
+    private static final int VELOCITAT_BARRA = 10;
+    private static final int MARGE_BARRA = 50;
+    private int puntuacioE = 0;
+    private int puntuacioD = 0;
+    private boolean amuntE, avallE, amuntD, avallD;
     public CercleRebotant() {
-        setBackground(Color.WHITE); // Defineix el color de fons del panell
-        timer = new Timer(DELAY, this); // Crea el temporitzador amb retard especificat
-        timer.start(); // Inicia el temporitzador
+        setBackground(Color.WHITE);
+        timer = new Timer(DELAY, this);
+        timer.start();
         setFocusable(true);
         addKeyListener(this);
 
+        barraE = new Barra(50, 50, 100, Color.BLACK, true);
+        barraD = new Barra(50, 50, 100, Color.BLACK, false);
     }
 
-    // Mètode per dibuixar el cercle dins del panell
+    private void actualitzarPosicioBarres() {
+        int ample = getWidth();
+        if (ample > 0) {
+            barraE.actualitzarPosicioX(ample, MARGE_BARRA);
+            barraD.actualitzarPosicioX(ample, MARGE_BARRA);
+        }
+    }
+
+    private void resetPilota() {
+        x = getWidth() / 2 - RADI;
+        y = getHeight() / 2 - RADI;
+        dx = -dx;
+    }
+
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        Graphics2D g2d = (Graphics2D) g; // Conversió a Graphics2D per millorar el dibuix
-        g2d.setColor(Color.RED); // Defineix el color del cercle
-        g2d.fillOval(x, y, RADI * 2, RADI * 2); // Dibuixa el cercle amb les coordenades i el radi
-        Graphics2D barraE = (Graphics2D) g;
-        barraE.setColor(Color.BLACK); // Defineix el color del cercle
-        barraE.fillRect(50, esquerraY, 50, 100);
-        Graphics2D barraD = (Graphics2D) g;
-        barraE.setColor(Color.BLACK); // Defineix el color del cercle
-        barraE.fillRect(1810, dretaY, 50, 100);
+        Graphics2D g2d = (Graphics2D) g;
+
+        g2d.setColor(Color.RED);
+        g2d.fillOval(x, y, RADI * 2, RADI * 2);
+
+        barraE.dibuixar(g2d);
+        barraD.dibuixar(g2d);
+        Graphics2D puntuacio = (Graphics2D) g;
+        puntuacio.setColor(Color.BLACK);
+        g2d.setFont(new Font("Arial", Font.BOLD, 48));
+        String marcador = puntuacioE + " - " + puntuacioD;
+        int ampleText = g2d.getFontMetrics().stringWidth(marcador);
+        g2d.drawString(marcador, (getWidth() - ampleText) / 2, 60); //En mig (dividim s'amplada per sa meitat) i a 60 px des de dalt.
     }
 
-    // Mètode que s'executa a cada tic del temporitzador per moure el cercle
     @Override
     public void actionPerformed(ActionEvent e) {
-        // Comprova si el cercle toca les vores horitzontals
-        if (x + 2 * RADI >= getWidth() || x <= 0) {
-            dx = -dx; // Inverteix la direcció horitzontal
+        if (y <= 0 || y + 2 * RADI >= getHeight()) {
+            dy = -dy;
         }
 
-        // Comprova si el cercle toca les vores verticals
-        if (y + 2 * RADI >= getHeight() || y <= 0) {
-            dy = -dy; // Inverteix la direcció vertical
+        if (dx < 0 &&
+                x <= barraE.getX() + barraE.getAmple() &&
+                x + 2 * RADI >= barraE.getX() &&
+                y + 2 * RADI >= barraE.getY() &&
+                y <= barraE.getY() + barraE.getAltura()) {
+
+            dx = -dx;
         }
 
-        // Actualitza la posició del cercle
-        x += dx;
-        y += dy;
-        repaint(); // Redibuixa el panell per actualitzar la posició del cercle
-    }
+        if (dx > 0 &&
+                x + 2 * RADI >= barraD.getX() &&
+                x <= barraD.getX() + barraD.getAmple() &&
+                y + 2 * RADI >= barraD.getY() &&
+                y <= barraD.getY() + barraD.getAltura()) {
 
-    @Override
-    public void keyTyped(KeyEvent e) {
+            dx = -dx;
 
+        }
+
+        if (x <= 0) {
+            puntuacioD++;
+            resetPilota();
+        } else if (x + 2 * RADI >= getWidth()) {
+            puntuacioE++;
+            resetPilota();
+        }
+
+        if (x > 0 && x + 2 * RADI < getWidth()) {
+            x += dx;
+            y += dy;
+        }
+
+        repaint();
     }
 
     @Override
     public void keyPressed(KeyEvent e) {
-        if(esquerraY >= -10){
-            if (e.getKeyCode() == KeyEvent.VK_W) {
-                esquerraY = esquerraY - 10;        }
-            else if (e.getKeyCode() == KeyEvent.VK_S) {
-                esquerraY = esquerraY + 10;
-            }
-        }
+        int key = e.getKeyCode();
+        int altPanell = getHeight();
 
-        if(dretaY >= -10){
-            if (e.getKeyCode() == KeyEvent.VK_UP) {
-                dretaY = dretaY - 10;        }
-            else if (e.getKeyCode() == KeyEvent.VK_DOWN) {
-                dretaY = dretaY + 10;
-            }
+        if (key == KeyEvent.VK_W) {
+            barraE.moure(-VELOCITAT_BARRA, altPanell);
+        } else if (key == KeyEvent.VK_S) {
+            barraE.moure(VELOCITAT_BARRA, altPanell);
+        }
+        if (key == KeyEvent.VK_UP) {
+            barraD.moure(-VELOCITAT_BARRA, altPanell);
+        } else if (key == KeyEvent.VK_DOWN) {
+            barraD.moure(VELOCITAT_BARRA, altPanell);
         }
         repaint();
+    }
 
+    @Override
+    public void setBounds(int x, int y, int width, int height) {
+        super.setBounds(x, y, width, height);
+        actualitzarPosicioBarres();
+    }
+
+    @Override
+    public void keyTyped(KeyEvent e) {
     }
 
     @Override
     public void keyReleased(KeyEvent e) {
-        repaint();
-
     }
 
-    // Mètode principal per iniciar l'aplicació
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
-            JFrame frame = new JFrame("Cercle Rebotant"); // Crea la finestra
-            CercleRebotant panel = new CercleRebotant(); // Crea una instància del panell
-            JLabel zInt = new JLabel();
-            zInt.setHorizontalTextPosition(SwingConstants.CENTER);
-            //zInt.setText();
-            frame.add(panel); // Afegeix el panell a la finestra
-
-            frame.setSize(1920, 1080); // Defineix la mida de la finestra
-            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); // Configura el tancament de la finestra
-            frame.setLocationRelativeTo(null); // Centra la finestra a la pantalla
-            frame.setVisible(true); // Mostra la finestra
+            JFrame frame = new JFrame("Pong");
+            CercleRebotant panel = new CercleRebotant();
+            frame.add(panel);
+            frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            frame.setLocationRelativeTo(null);
+            frame.setVisible(true);
         });
     }
-
 }
